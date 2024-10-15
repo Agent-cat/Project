@@ -4,7 +4,12 @@ import SidebarRoutes from "../Routes/SidebarRoutes";
 import Navbar from "../Components/Navbar";
 import { AnimatePresence } from "framer-motion";
 
-const LayoutPage = () => {
+const LayoutPage = ({
+  properties,
+  setProperties,
+  showFilters,
+  setShowFilters,
+}) => {
   const [darkMode, setDarkMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -28,7 +33,13 @@ const LayoutPage = () => {
           setIsSidebarOpen={setIsSidebarOpen}
         />
         <AnimatePresence mode="wait">
-          <SidebarRoutes darkMode={darkMode} />
+          <SidebarRoutes
+            darkMode={darkMode}
+            setProperties={setProperties}
+            properties={properties}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+          />
         </AnimatePresence>
       </div>
     </div>

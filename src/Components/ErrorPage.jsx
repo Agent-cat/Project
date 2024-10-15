@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const ErrorPage = () => {
   return (
-    <div className="flex flex-col items-center w-full justify-center min-h-screen  dark:bg-gray-800">
+    <div className="flex flex-col md:w-[83%] items-center w-full justify-center min-h-screen  dark:bg-gray-800">
       <svg
         className="w-64 h-64 mb-8"
         viewBox="0 0 24 24"

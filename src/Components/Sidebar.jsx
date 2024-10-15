@@ -37,7 +37,7 @@ const Sidebar = ({ darkMode, isSidebarOpen, setIsSidebarOpen }) => {
     <aside
       className={`md:w-60 ${
         isSidebarOpen ? "w-16" : "w-0"
-      } mt-11 rounded-2xl font-bold flex flex-col flex-nowrap ml-3 items-center h-full transition-all duration-300 ${
+      } mt-6 rounded-2xl font-bold flex flex-col flex-nowrap ml-3 z-50 items-center h-full transition-all duration-300 ${
         isDarkMode ? "bg-gray-800" : "bg-white"
       } relative`}
     >

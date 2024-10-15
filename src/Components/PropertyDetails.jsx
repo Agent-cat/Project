@@ -1,15 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { properties } from "../Constants/Constants";
 import { ArrowLeft, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
-const PropertyDetails = () => {
+const PropertyDetails = ({ properties }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const property = properties.find((p) => p.id === parseInt(id));
+  const [property, setProperty] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedBHK, setSelectedBHK] = useState(property?.bhk[0]);
+  const [selectedBHK, setSelectedBHK] = useState(null);
   const [activeSection, setActiveSection] = useState("overview");
+
+  const getBHKOptions = (bhk) => {
+    if (Array.isArray(bhk)) return bhk;
+    if (typeof bhk === "number") return [bhk];
+    return [];
+  };
+
+  useEffect(() => {
+    const foundProperty = properties.find((prop) => prop.id === id);
+    if (foundProperty) {
+      setProperty(foundProperty);
+      const bhkOptions = getBHKOptions(foundProperty.bhk);
+      setSelectedBHK(bhkOptions.length > 0 ? bhkOptions[0] : null);
+    }
+  }, [id, properties]);
 
   if (!property) {
     return <div>Property not found</div>;
@@ -41,12 +55,11 @@ const PropertyDetails = () => {
           <h2 className="text-4xl hidden md:flex font-bold mb-2 dark:text-white">
             {property.name}
           </h2>
-          <p className="text-2xl  text-blue-600 font-bold dark:text-white">
-            ₹{property.rentOrPrice.toLocaleString()}
-            {property.rentOrPrice > 100000 ? "" : "/month"}
+          <p className="text-3xl  text-blue-600 font-bold dark:text-white">
+            ₹{property.price} {property.saleOrRent === "rent" ? "/month" : ""}
           </p>
         </div>
-        <p className="text-gray-600 flex items-center mb-6 dark:text-gray-300">
+        <p className="text-gray-600 md:flex hidden items-center mb-6 dark:text-gray-300">
           <MapPin size={20} className="mr-2" /> {property.address}
         </p>
         <div className="relative mb-4">
@@ -88,16 +101,15 @@ const PropertyDetails = () => {
         <p className="text-gray-600 flex md:hidden justify-center mb-6 items-center dark:text-gray-300 ">
           <MapPin size={20} className="mr-2" /> {property.address}
         </p>
-        <p className="text-xl md:hidden flex   font-bold mb-4 dark:text-white">
-          ₹{property.rentOrPrice.toLocaleString()}
-          {property.rentOrPrice > 100000 ? "" : "/month"}
+        <p className="text-xl text-blue-500 md:hidden flex font-bold mb-4 dark:text-white">
+          ₹{property.price} {property.saleOrRent === "rent" ? "/month" : ""}
         </p>
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2 dark:text-white">
             BHK Options:
           </h3>
           <div className="flex space-x-2">
-            {property.bhk.map((bhk) => (
+            {getBHKOptions(property.bhk).map((bhk) => (
               <button
                 key={bhk}
                 onClick={() => setSelectedBHK(bhk)}
@@ -112,13 +124,7 @@ const PropertyDetails = () => {
             ))}
           </div>
         </div>
-        <div className="flex mt-4 items-center mb-2">
-          <span className="text-yellow-400 mr-2">★</span>
-          <span className="dark:text-white">{property.starRating}</span>
-          <span className="text-gray-600 dark:text-gray-400 ml-2">
-            ({property.numberOfReviews} reviews)
-          </span>
-        </div>
+
         <div>
           <div className="flex  space-x-6 mb-4">
             <span
@@ -157,10 +163,6 @@ const PropertyDetails = () => {
               <div>
                 <p className="text-gray-700 dark:text-gray-300 mb-6">
                   {property.details}
-                  Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                  Quisquam accusantium exercitationem tempore impedit quaerat,
-                  ex odio temporibus! Cum sit perspiciatis qui tempore quis
-                  laboriosam eum repudiandae laborum itaque, quidem ea.
                 </p>
               </div>
             )}
@@ -169,17 +171,20 @@ const PropertyDetails = () => {
                 <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 mb-6">
                   <li>Owner: {property.ownerName}</li>
                   <li>Location: {property.location}</li>
-                  <li>BHK Options: {property.bhk.join(", ")}</li>
+                  <li>BHK Options: {property.bhk}</li>
+                  <li>Type: {property.type}</li>
+                  <li>
+                    For: {property.saleOrRent === "rent" ? "Rent" : "Sale"}
+                  </li>
                 </ul>
               </div>
             )}
             {activeSection === "amenities" && (
               <div>
                 <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 mb-6">
-                  <li>24/7 Security</li>
-                  <li>Parking</li>
-                  <li>Power Backup</li>
-                  <li>Lift</li>
+                  {property.amenities.map((amenity, index) => (
+                    <li key={index}>{amenity}</li>
+                  ))}
                 </ul>
               </div>
             )}
@@ -189,7 +194,7 @@ const PropertyDetails = () => {
               Contact Agent
             </button>
             <button className="px-8 py-3 bg-red-500 text-white border  rounded-2xl hover:bg-red-600 transition-colors duration-300">
-              Book Now
+              {property.saleOrRent === "rent" ? "Rent Now" : "Buy Now"}
             </button>
           </div>
         </div>

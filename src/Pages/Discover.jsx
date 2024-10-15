@@ -1,23 +1,45 @@
 import React, { useState, useEffect } from "react";
-import { properties } from "../Constants/Constants";
 import PropertyCard from "../Components/PropertyCard";
-import { Search, Filter, SortAsc } from "lucide-react";
+import { Search, Filter, SortAsc, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 
-const Discover = () => {
+const Discover = ({ properties, setProperties }) => {
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlace, setSelectedPlace] = useState("All");
   const [selectedBHK, setSelectedBHK] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
-  const [filteredProperties, setFilteredProperties] = useState(properties);
+  const [selectedSaleOrRent, setSelectedSaleOrRent] = useState("All");
+  const [filteredProperties, setFilteredProperties] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 1000000]);
+  const [priceRange, setPriceRange] = useState([0, 100000000]);
   const [sortBy, setSortBy] = useState("default");
 
-  const places = ["All", "Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata"];
-  const bhks = ["All", "1 BHK", "2 BHK", "3 BHK", "4 BHK", "5+ BHK"];
-  const types = ["All", "Apartment", "House", "Villa", "PG"];
-  const sortOptions = ["default", "price-low-to-high", "price-high-to-low"];
+  const places = ["All", ...new Set(properties.map((p) => p.location))];
+  const bhks = ["All", ...new Set(properties.map((p) => p.bhk))];
+  const types = ["All", ...new Set(properties.map((p) => p.type))];
+  const saleOrRentOptions = ["All", "Sale", "Rent"];
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const saleOrRentParam = params.get("saleOrRent");
+    const placeParam = params.get("Place");
+    const bhkParam = params.get("BHK");
+    const typeParam = params.get("Type");
+    if (saleOrRentParam) {
+      setSelectedSaleOrRent(saleOrRentParam);
+    }
+    if (placeParam) {
+      setSelectedPlace(placeParam);
+    }
+    if (bhkParam) {
+      setSelectedBHK(bhkParam);
+    }
+    if (typeParam) {
+      setSelectedType(typeParam);
+    }
+  }, [location]);
 
   useEffect(() => {
     let filtered = properties.filter((property) => {
@@ -25,41 +47,95 @@ const Discover = () => {
         property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         property.location.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesPlace =
-        selectedPlace === "All" || property.location === selectedPlace;
+        selectedPlace === "All" ||
+        property.location.toLowerCase() === selectedPlace.toLowerCase();
       const matchesBHK =
-        selectedBHK === "All" || property.bhk.includes(parseInt(selectedBHK));
+        selectedBHK === "All" ||
+        property.bhk.toLowerCase() === selectedBHK.toLowerCase();
       const matchesType =
-        selectedType === "All" || property.type === selectedType;
+        selectedType === "All" ||
+        property.type.toLowerCase() === selectedType.toLowerCase();
+      const matchesSaleOrRent =
+        selectedSaleOrRent === "All" ||
+        property.saleOrRent.toLowerCase() === selectedSaleOrRent.toLowerCase();
       const matchesPrice =
-        property.rentOrPrice >= priceRange[0] &&
-        property.rentOrPrice <= priceRange[1];
+        property.price >= priceRange[0] && property.price <= priceRange[1];
+
       return (
         matchesSearch &&
         matchesPlace &&
         matchesBHK &&
         matchesType &&
+        matchesSaleOrRent &&
         matchesPrice
       );
     });
 
     if (sortBy === "price-low-to-high") {
-      filtered.sort((a, b) => a.rentOrPrice - b.rentOrPrice);
+      filtered.sort((a, b) => a.price - b.price);
     } else if (sortBy === "price-high-to-low") {
-      filtered.sort((a, b) => b.rentOrPrice - a.rentOrPrice);
+      filtered.sort((a, b) => b.price - a.price);
     }
 
     setFilteredProperties(filtered);
+    console.log("Filtered properties:", filtered);
   }, [
+    properties,
     searchTerm,
     selectedPlace,
     selectedBHK,
     selectedType,
+    selectedSaleOrRent,
     priceRange,
     sortBy,
   ]);
 
   const toggleFilters = () => {
     setShowFilters(!showFilters);
+  };
+
+  const handleSaleOrRentChange = (value) => {
+    setSelectedSaleOrRent(value);
+  };
+
+  const getAppliedFilters = () => {
+    const filters = [];
+    if (selectedPlace !== "All")
+      filters.push({ type: "Place", value: selectedPlace });
+    if (selectedBHK !== "All")
+      filters.push({ type: "BHK", value: selectedBHK });
+    if (selectedType !== "All")
+      filters.push({ type: "Type", value: selectedType });
+    if (selectedSaleOrRent !== "All")
+      filters.push({ type: "SaleOrRent", value: selectedSaleOrRent });
+    if (priceRange[0] !== 0 || priceRange[1] !== 100000000)
+      filters.push({
+        type: "Price",
+        value: `₹${priceRange[0]} - ₹${priceRange[1]}`,
+      });
+    return filters;
+  };
+
+  const removeFilter = (filterType) => {
+    switch (filterType) {
+      case "Place":
+        setSelectedPlace("All");
+        break;
+      case "BHK":
+        setSelectedBHK("All");
+        break;
+      case "Type":
+        setSelectedType("All");
+        break;
+      case "SaleOrRent":
+        setSelectedSaleOrRent("All");
+        break;
+      case "Price":
+        setPriceRange([0, 100000000]);
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -119,7 +195,7 @@ const Discover = () => {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4"
+              className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-4"
             >
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -171,6 +247,25 @@ const Discover = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Sale or Rent
+                </label>
+                <select
+                  className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                  value={selectedSaleOrRent}
+                  onChange={(e) => handleSaleOrRentChange(e.target.value)}
+                >
+                  {saleOrRentOptions.map((option) => (
+                    <option
+                      key={option}
+                      value={option === "All" ? "All" : option.toLowerCase()}
+                    >
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Price Range
                 </label>
                 <div className="flex items-center">
@@ -203,6 +298,32 @@ const Discover = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
+        className="mb-4"
+      >
+        <h2 className="text-lg font-bold mb-2 text-gray-700 dark:text-gray-300">
+          Applied Filters:
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {getAppliedFilters().map((filter, index) => (
+            <span
+              key={index}
+              className="bg-blue-100 font-bold text-blue-800 text-sm mr-2 px-3 py-1 rounded dark:bg-blue-900 dark:text-blue-300 flex items-center group"
+            >
+              {`${filter.type}: ${filter.value}`}
+              <button
+                onClick={() => removeFilter(filter.type)}
+                className="ml-2 focus:outline-none opacity-90 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              >
+                <X size={16} />
+              </button>
+            </span>
+          ))}
+        </div>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
       >
         <AnimatePresence>
@@ -214,7 +335,7 @@ const Discover = () => {
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
             >
-              <PropertyCard property={property} />
+              <PropertyCard setProperties={setProperties} property={property} />
             </motion.div>
           ))}
         </AnimatePresence>

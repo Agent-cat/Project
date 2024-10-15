@@ -2,26 +2,32 @@ import React, { useEffect, useState } from "react";
 import LayoutPage from "./Pages/LayoutPage";
 import LandingPage from "./Pages/LandingPage";
 import axios from "axios";
+
 const App = () => {
   const [isLandingPage, setIsLandingPage] = useState(false);
   const [properties, setProperties] = useState([]);
 
   useEffect(() => {
-    const prorperties = async () => {
-      await axios.get("http://localhost:4000/api/properties").then((res) => {
+    const fetchProperties = async () => {
+      try {
+        const res = await axios.get("http://localhost:4000/api/properties");
         setProperties(res.data);
-        console.log(properties);
-      });
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      }
     };
-    prorperties();
+    fetchProperties();
   }, []);
 
   return (
     <div className="w-full select-none h-screen bg-white">
       {isLandingPage ? (
-        <LandingPage setIsLandingPage={setIsLandingPage} />
+        <LandingPage
+          properties={properties}
+          setIsLandingPage={setIsLandingPage}
+        />
       ) : (
-        <LayoutPage />
+        <LayoutPage properties={properties} setProperties={setProperties} />
       )}
     </div>
   );

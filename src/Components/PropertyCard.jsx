@@ -14,24 +14,22 @@ const PropertyCard = ({ property }) => {
     setTimeout(() => setIsAnimating(false), 100);
   };
 
+  const { id, name, location, price } = property;
+
   return (
     <div className="relative rounded-2xl bg-white border dark:border-gray-400 dark:bg-gray-800  shadow-md overflow-hidden transition-transform duration-300  md:hover:scale-105">
-      <Link to={`/property/${property.id}`}>
-        <img
-          src={img2}
-          alt={property.name}
-          className="w-full h-48 object-cover "
-        />
+      <Link to={`/property/${id}`}>
+        <img src={img2} alt={name} className="w-full h-48 object-cover " />
+        <p className="absolute top-2 left-2 bg-gray-500  text-white px-2  font-bold py-1 rounded-md text-sm">
+          {property.saleOrRent.toUpperCase()}
+        </p>
         <div className="p-4">
-          <h3 className="font-semibold text-lg mb-2 dark:text-white">
-            {property.name}
+          <h3 className="font-bold text-gray-700 text-lg mb-2 dark:text-white">
+            {name}
           </h3>
-          <p className="text-gray-600 dark:text-gray-300 mb-2">
-            {property.location}
-          </p>
-          <p className="text-xl font-bold dark:text-white">
-            ₹{property.rentOrPrice.toLocaleString()}
-            {property.rentOrPrice > 100000 ? "" : "/month"}
+          <p className="text-gray-600 dark:text-gray-300 mb-2">{location}</p>
+          <p className="text-xl text-blue-600 font-bold dark:text-white">
+            ₹{price}
           </p>
         </div>
       </Link>
