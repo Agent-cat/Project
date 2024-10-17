@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-const Navbar = ({ darkMode, setDarkMode }) => {
+const Navbar = ({ userInfo, darkMode, setDarkMode, isLoggedIn }) => {
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
@@ -20,7 +20,9 @@ const Navbar = ({ darkMode, setDarkMode }) => {
         to="/"
         className="md:text-2xl text-3xl text-gray-600 dark:text-gray-300 font-bold ml-10 md:ml-10"
       >
-        <span className="text-blue-600">Midland</span> Real-Estate
+        <span className=" flex gap-2 items-center text-blue-600">
+          Midland <h1 className="hidden text-gray-400 md:block">Real-Estate</h1>
+        </span>
       </Link>
       <div className="md:flex hidden items-center bg-gray-200 rounded-full p-1">
         <button

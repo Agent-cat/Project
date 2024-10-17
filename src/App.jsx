@@ -6,7 +6,8 @@ import axios from "axios";
 const App = () => {
   const [isLandingPage, setIsLandingPage] = useState(false);
   const [properties, setProperties] = useState([]);
-
+  const [userInfo, setUserInfo] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   useEffect(() => {
     const fetchProperties = async () => {
       try {
@@ -23,6 +24,10 @@ const App = () => {
     <div className="w-full select-none h-screen bg-white">
       {isLandingPage ? (
         <LandingPage
+          isLoggedIn={isLoggedIn}
+          setIsLoggedIn={setIsLoggedIn}
+          userInfo={userInfo}
+          setUserInfo={setUserInfo}
           properties={properties}
           setIsLandingPage={setIsLandingPage}
         />

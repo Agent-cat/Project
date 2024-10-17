@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
-const Signin = () => {
+const Signin = ({ setIsLandingPage, setUserInfo, setIsLoggedIn }) => {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
@@ -24,7 +24,7 @@ const Signin = () => {
         progress: undefined,
         theme: "dark",
       });
-      setLoading(false);
+
       return;
     }
     try {
@@ -49,8 +49,12 @@ const Signin = () => {
         theme: "dark",
       });
       setLoading(false);
+      console.log(data);
+      navigate("/");
       localStorage.setItem("userInfo", JSON.stringify(data));
-      navigate("/chats");
+      setIsLandingPage(false);
+      setUserInfo(data);
+      setIsLoggedIn(true);
     } catch (error) {
       toast.error("Invalid Credentials", {
         position: "top-right",
@@ -62,7 +66,6 @@ const Signin = () => {
         progress: undefined,
         theme: "dark",
       });
-      setLoading(false);
     }
   };
 
